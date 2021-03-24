@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>内存对齐 | 麒麟科技</title>
+  <meta name="description" content="内存对齐 在我们的程序中，数据结构还有变量等等都需要占有内存，在很多系统中，它都要求内存分配的时候要对齐，这样做的好处就是可以提高访问内存的速度。 原则结构体的大小等于结构体内最大成员大小的整数倍结构体内的成员的首地址相对于结构体首地址的偏移量是其类型大小的整数倍为了满足规则1和2编译器会在结构体成员之后进行字节填充  我们还是先来看一段简单的程序：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存对齐">
+<meta property="og:url" content="http://example.com/2021/03/17/language_c_cpp_keyword_sizeof_2/index.html">
+<meta property="og:site_name" content="����Ƽ�">
+<meta property="og:description" content="内存对齐 在我们的程序中，数据结构还有变量等等都需要占有内存，在很多系统中，它都要求内存分配的时候要对齐，这样做的好处就是可以提高访问内存的速度。 原则结构体的大小等于结构体内最大成员大小的整数倍结构体内的成员的首地址相对于结构体首地址的偏移量是其类型大小的整数倍为了满足规则1和2编译器会在结构体成员之后进行字节填充  我们还是先来看一段简单的程序：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_1.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_2.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_4.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_3.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_5.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_6.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_7.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_8.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_9.png">
+<meta property="article:published_time" content="2021-03-17T13:52:29.627Z">
+<meta property="article:modified_time" content="2021-03-23T23:24:26.874Z">
+<meta property="article:author" content="Mr.wang">
+<meta property="article:tag" content="c++&amp;c语言">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_1.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2021/03/17/language_c_cpp_keyword_sizeof_2/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="����Ƽ�" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-green" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/cofess" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">昵称</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/idea/">idea</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/management/">management</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/">search</a><span class="category-list-count">7</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/search/clucene/">clucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/elasticsearch/">elasticsearch</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/indextank/">indextank</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/kingso/">kingso</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/lucene/">lucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/sphinx/">sphinx</a><span class="category-list-count">2</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E5%8E%9F%E5%88%9B/">原创</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><span class="category-list-count">7</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/">生活</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/%E4%B8%8A%E5%AD%A6%E7%9A%84%E6%84%8F%E4%B9%89/">上学的意义</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><span class="category-list-count">20</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a><span class="category-list-count">20</span></li></ul></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a><span class="tag-list-count">21</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/clucene/" rel="tag">clucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/" rel="tag">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/indextank/" rel="tag">indextank</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kingso/" rel="tag">kingso</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lucene/" rel="tag">lucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/management/" rel="tag">management</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sphinx/" rel="tag">sphinx</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/c-c%E8%AF%AD%E8%A8%80/" style="font-size: 14px;">c++&c语言</a> <a href="/tags/clucene/" style="font-size: 13px;">clucene</a> <a href="/tags/elasticsearch/" style="font-size: 13px;">elasticsearch</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/indextank/" style="font-size: 13px;">indextank</a> <a href="/tags/kingso/" style="font-size: 13px;">kingso</a> <a href="/tags/lucene/" style="font-size: 13px;">lucene</a> <a href="/tags/management/" style="font-size: 13px;">management</a> <a href="/tags/sphinx/" style="font-size: 13.5px;">sphinx</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">45</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/24/language_c_cpp_keyword_sizeof_3/" class="title">设置字节对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-23T23:15:54.507Z" itemprop="datePublished">2021-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/" class="title">内存对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T13:52:29.627Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_f_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:17:54.001Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_skills_bit_2/" class="title">按位指定结构体中变量的大小</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:16:54.603Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_function_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T00:55:39.668Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-language_c_cpp_keyword_sizeof_2" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      内存对齐
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/" class="article-date">
+	  <time datetime="2021-03-17T13:52:29.627Z" itemprop="datePublished">2021-03-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p><strong>内存对齐</strong><br> 在我们的程序中，数据结构还有变量等等都需要占有内存，在很多系统中，它都要求内存分配的时候要对齐，这样做的好处就是可以提高访问内存的速度。</p>
+<p><strong>原则</strong><br>结构体的大小等于结构体内最大成员大小的整数倍<br>结构体内的成员的首地址相对于结构体首地址的偏移量是其类型大小的整数倍<br>为了满足规则1和2编译器会在结构体成员之后进行字节填充</p>
+<p> 我们还是先来看一段简单的程序：</p>
+<pre><code>                            程序一
+</code></pre>
+<p> 1 #include <iostream><br> 2 using namespace std;<br> 3<br> 4 struct X1<br> 5 {<br> 6   int i;//4个字节<br> 7   char c1;//1个字节<br> 8   char c2;//1个字节<br> 9 };<br>10<br>11 struct X2<br>12 {<br>13   char c1;//1个字节<br>14   int i;//4个字节<br>15   char c2;//1个字节<br>16 };<br>17<br>18 struct X3<br>19 {<br>20   char c1;//1个字节<br>21   char c2;//1个字节<br>22   int i;//4个字节<br>23 };<br>24 int main()<br>25 {<br>26     cout&lt;&lt;”long “&lt;&lt;sizeof(long)&lt;&lt;”\n”;<br>27     cout&lt;&lt;”float “&lt;&lt;sizeof(float)&lt;&lt;”\n”;<br>28     cout&lt;&lt;”int “&lt;&lt;sizeof(int)&lt;&lt;”\n”;<br>29     cout&lt;&lt;”char “&lt;&lt;sizeof(char)&lt;&lt;”\n”;<br>30<br>31     X1 x1;<br>32     X2 x2;<br>33     X3 x3;<br>34     cout&lt;&lt;”x1 的大小 “&lt;&lt;sizeof(x1)&lt;&lt;”\n”;<br>35     cout&lt;&lt;”x2 的大小 “&lt;&lt;sizeof(x2)&lt;&lt;”\n”;<br>36     cout&lt;&lt;”x3 的大小 “&lt;&lt;sizeof(x3)&lt;&lt;”\n”;<br>37     return 0;<br>38 }</p>
+<p>这段程序的功能很简单，就是定义了三个结构X1,X2,X3,这三个结构的主要区别就是内存数据摆放的顺序，其他都是一样的，另外程序输入了几种基本类型所占用的字节数，以及我们这里的三个结构所占用的字节数。</p>
+<p>这段程序的运行结果为：</p>
+<p>1 long 4<br>2 float 4<br>3 int 4<br>4 char 1<br>5 x1 的大小 8<br>6 x2 的大小 12<br>7 x3 的大小 8</p>
+<p> 结果的前面四行没有什么问题，但是我们在最后三行就可以看到三个结构占用的空间大小不一样，造成这个原因就是内部数据的摆放顺序，怎么会这样呢？</p>
+<p> 下面就是我们需要讲的内存对齐了。</p>
+<p> 内存是一个连续的块，我们可以用下面的图来表示,  它是以4个字节对一个对齐单位的：</p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_1.jpg" alt="avatar"></p>
+<p> 图一</p>
+<p>   让我们看看三个结构在内存中的布局：</p>
+<p>   首先是 X1，如下图所示</p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_2.jpg" alt="avatar"></p>
+<p> X1 中第一个是 Int类型，它占有4字节，所以前面4格就是满了，然后第二个是char类型，这中类型只占一个字节，所以它占有了第二个4字节组块中的第一格，第三个也是char类型，所以它也占用一个字节，它就排在了第二个组块的第二格，因为它们加在一起大小也不超过一个块，所以他们三个变量在内存中的结构就是这样的，因为有内存分块对齐，所以最后出来的结果是8，而不是6，因为后面两个格子其实也算是被用了。</p>
+<p> 再次看看X2，如图所示</p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_4.jpg" alt="avatar"></p>
+<p>X2中第一个类型是Char类型，它占用一个字节，所以它首先排在第一组块的第一个格子里面，第二个是Int类型，它占用4个字节，第一组块已经用掉一格，还剩3格，肯定是无法放下第二Int类型的，因为要考虑到对齐，所以不得不把它放到第二个组块，第三个类型是Char类型，跟第一个类似。所因为有内存分块对齐，我们的内存就不是8个格子了，而是12个了。</p>
+<p>再看看X3，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_3.jpg" alt="avatar"></p>
+<p>关于X3的说明其实跟X1是类似的，只不过它把两个1个字节的放到了前面，相信看了前面两种情况的说明这里也是很容易理解的。</p>
+<p>含有其他类时：</p>
+<p>分析各个成员长度(包括其他类成员的长度)；<br>其他类成员的长度不会随着位置的变化而变化；<br>找出各个成员的长度最大值（包含其他类和结构体的成员）；<br>若长度最大成员在为结构体的成员中，则按结构体成员为分界点分界；<br>其他成员中有最大长度的成员，则该成员为分界点；<br>求出各段长度，求出大于该和的最小M的整数倍即为该部分长度<br>class A{<br>       char a;<br>       double b;<br>       int c;<br>};//sizeof(A)为24B<br>class C{<br>       char a;<br>       A obj;<br>       int b;<br>       double c;<br>};//a、b、obj、c的长度分别为1、24、4、8；最长的成员为8，所以以obj和c为界。<br>//每部分都取大于各部分和的8的最小倍数。sizeof(C)=8+24+8+8=48B</p>
+<p><strong>空结构体和空类型</strong><br>空结构体和空类型的大小计算。含有虚函数的类的大小计算。</p>
+<p>sizeof(空类)和sizeof(空结构体)的大小都为1</p>
+<p><strong>static的结构体</strong><br>有static的结构体 struct S4{ char a; long b; static long c; //静态 };<br>静态变量存放在全局数据区内，而sizeof计算栈中分配的空间的大小，故不计算在内，S4的大小为4+4=8。<br>#pragma pack（n）指令设置1.2.4对齐。linux下最高位4.#pragma pack（）指令默认为四。</p>
+<p><strong>union</strong><br>union的长度取决于其中的长度最大的那个成员变量的长度。即union中成员变量是重叠摆放的，其开始地址相同。<br>其实union(共用体)的各个成员是以同一个地址开始存放的,每一个时刻只可以存储一个成员,这样就要求它在分配内存单元时候要满足两点:<br>  1.一般而言,共用体类型实际占用存储空间为其最长的成员所占的存储空间；<br>  2.若是该最长的存储空间对其他成员的元类型(如果是数组,取其类型的数据长度,例int   a[5]为4)不满足整除关系,该最大空间自动延伸;<br>  我们来看看这段代码:<br>union mm{ char a;//元长度1 int b[5];//元长度4 double c;//元长度8 int d[3]; };<br>本来mm的空间应该是sizeof(int)*5=20;但是如果只是20个单元的话,那可以存几个double型(8位)呢?两个半?当然不可以,所以mm的空间延伸为既要大于20,又要满足其他成员所需空间的整数倍,即24<br>所以union的存储空间先看它的成员中哪个占的空间最大,拿他与其他成员的元长度比较,如果可以整除就行。</p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_5.png" alt="avatar"></p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_6.png" alt="avatar"></p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_7.png" alt="avatar"></p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_8.png" alt="avatar"></p>
+<p><img src="https://raw.githubusercontent.com/qilinkejiw/pic/master/language/c/keyword_sizeof_page2_9.png" alt="avatar"></p>
+<p><strong>参考材料</strong><br><a target="_blank" rel="noopener" href="http://www.cppblog.com/cc/archive/2011/08/28/10765.html">http://www.cppblog.com/cc/archive/2011/08/28/10765.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/so_geili/article/details/53014722">https://blog.csdn.net/so_geili/article/details/53014722</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2021/03/17/language_c_cpp_keyword_sizeof_2/" title="内存对齐" target="_blank" rel="external">http://example.com/2021/03/17/language_c_cpp_keyword_sizeof_2/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/cofess" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/cofess" target="_blank"><span class="text-dark">昵称</span><small class="ml-1x">Web Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/24/language_c_cpp_keyword_sizeof_3/" title="设置字节对齐"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/17/language_c_cpp_f_1_c/" title="函数"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '',
+    appKey: '',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

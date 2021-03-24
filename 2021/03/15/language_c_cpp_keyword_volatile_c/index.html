@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>volatile 关键字详解 | 麒麟科技</title>
+  <meta name="description" content="最近在讨论多线程编程中的一个可能的 false sharing 问题时，有人提出加 volatile 可能可以解决问题。这种错误的认识荼毒多年，促使我写下这篇文章。 约定Volatile 这个话题，涉及到计算机科学多个领域多个层次的诸多细节。仅靠一篇博客，很难穷尽这些细节。因此，若不对讨论范围做一些约定，很容易就有诸多漏洞。到时误人子弟，就不好了。以下是一些基本的约定： 这篇博文讨论的 volat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="volatile 关键字详解">
+<meta property="og:url" content="http://example.com/2021/03/15/language_c_cpp_keyword_volatile_c/index.html">
+<meta property="og:site_name" content="����Ƽ�">
+<meta property="og:description" content="最近在讨论多线程编程中的一个可能的 false sharing 问题时，有人提出加 volatile 可能可以解决问题。这种错误的认识荼毒多年，促使我写下这篇文章。 约定Volatile 这个话题，涉及到计算机科学多个领域多个层次的诸多细节。仅靠一篇博客，很难穷尽这些细节。因此，若不对讨论范围做一些约定，很容易就有诸多漏洞。到时误人子弟，就不好了。以下是一些基本的约定： 这篇博文讨论的 volat">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-15T14:15:54.572Z">
+<meta property="article:modified_time" content="2021-03-17T00:15:34.164Z">
+<meta property="article:author" content="Mr.wang">
+<meta property="article:tag" content="c++&amp;c语言">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2021/03/15/language_c_cpp_keyword_volatile_c/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="����Ƽ�" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-green" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/cofess" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">昵称</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/idea/">idea</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/management/">management</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/">search</a><span class="category-list-count">7</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/search/clucene/">clucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/elasticsearch/">elasticsearch</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/indextank/">indextank</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/kingso/">kingso</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/lucene/">lucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/sphinx/">sphinx</a><span class="category-list-count">2</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E5%8E%9F%E5%88%9B/">原创</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><span class="category-list-count">7</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/">生活</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/%E4%B8%8A%E5%AD%A6%E7%9A%84%E6%84%8F%E4%B9%89/">上学的意义</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><span class="category-list-count">20</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a><span class="category-list-count">20</span></li></ul></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a><span class="tag-list-count">21</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/clucene/" rel="tag">clucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/" rel="tag">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/indextank/" rel="tag">indextank</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kingso/" rel="tag">kingso</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lucene/" rel="tag">lucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/management/" rel="tag">management</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sphinx/" rel="tag">sphinx</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/c-c%E8%AF%AD%E8%A8%80/" style="font-size: 14px;">c++&c语言</a> <a href="/tags/clucene/" style="font-size: 13px;">clucene</a> <a href="/tags/elasticsearch/" style="font-size: 13px;">elasticsearch</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/indextank/" style="font-size: 13px;">indextank</a> <a href="/tags/kingso/" style="font-size: 13px;">kingso</a> <a href="/tags/lucene/" style="font-size: 13px;">lucene</a> <a href="/tags/management/" style="font-size: 13px;">management</a> <a href="/tags/sphinx/" style="font-size: 13.5px;">sphinx</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">45</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/24/language_c_cpp_keyword_sizeof_3/" class="title">设置字节对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-23T23:15:54.507Z" itemprop="datePublished">2021-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/" class="title">内存对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T13:52:29.627Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_f_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:17:54.001Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_skills_bit_2/" class="title">按位指定结构体中变量的大小</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:16:54.603Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_function_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T00:55:39.668Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-language_c_cpp_keyword_volatile_c" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      volatile 关键字详解
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/15/language_c_cpp_keyword_volatile_c/" class="article-date">
+	  <time datetime="2021-03-15T14:15:54.572Z" itemprop="datePublished">2021-03-15</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a>►<a class="article-category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/15/language_c_cpp_keyword_volatile_c/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>最近在讨论多线程编程中的一个可能的 false sharing 问题时，有人提出加 volatile 可能可以解决问题。这种错误的认识荼毒多年，促使我写下这篇文章。</p>
+<p>约定<br>Volatile 这个话题，涉及到计算机科学多个领域多个层次的诸多细节。仅靠一篇博客，很难穷尽这些细节。因此，若不对讨论范围做一些约定，很容易就有诸多漏洞。到时误人子弟，就不好了。以下是一些基本的约定：</p>
+<p>这篇博文讨论的 volatile 关键字，是 C 和 C++ 语言中的关键字。Java 等语言中，也有 volatile 关键字。但它们和 C/C++ 里的 volatile 不完全相同，不在这篇博文的讨论范围内。<br>这篇博文讨论的 volatile 关键字，是限定在 C/C++ 标准之下的。这也就是说，我们讨论的内容应该是与平台无关的，同时也是与编译器扩展无关的。<br>相应的，这篇文章讨论的「标准」指的是 C/C++ 的标准，而不是其他什么东西。<br>我们希望编写的代码是 (1) 符合标准的，(2) 性能良好的，(3) 可移植的。这里 (1) 保证了代码执行结果的正确性，(2) 保证了高效性，(3) 体现了平台无关性（以及编译器扩展等的无关性）。<br>含义<br>单词 volatile 的含义<br>在谈及 C/C++ 中的 volatile 关键字时，总有人会拿 volatile 这个英文单词的中文解释说事。他们把 volatile 翻译作「易变的」。但事实上，对于翻译来说，很多时候目标语言很难找到一个词能够反映源语言中单词的全部含义和细节。此处「易变的」就无法做到这一点。</p>
+<p>Volatile 的意思，若要详细理解，还是应该查阅权威的英英字典。在柯林斯高阶学习词典中，volatile 是这样解释的：</p>
+<p>A situation that is volatile is likely to change suddenly and unexpectedly.<br>这里对 volatile 的解释有三个精髓的形容词和副词，体现了 volatile 的含义。</p>
+<p>likely：可能的。这意味着被 volatile 形容的对象「有可能也有可能不」发生改变，因此我们不能对这样的对象的状态做出任何假设。<br>suddenly：突然地。这意味着被 volatile 形容的对象可能发生瞬时改变。<br>unexpectedly：不可预期地。这与 likely 相互呼应，意味着被 volatile 形容的对象可能以各种不可预期的方式和时间发生更改。<br>因此，volatile 其实就是告诉我们，被它修饰的对象出现任何情况都不要奇怪，我们不能对它们做任何假设。</p>
+<p>程序中 volatile 的含义<br>对于程序员来说，程序本身的任何行为都必须是可预期的。那么，在程序当中，什么才叫 volatile 呢？这个问题的答案也很简单：程序可能受到程序之外的因素影响。</p>
+<p>考虑以下 C/C++ 代码。</p>
+<p>volatile int <em>p = /</em> … */;<br>int a, b;<br>a = *p;<br>b = *p;<br>若忽略 volatile，那么 p 就只是一个「指向 int 类型的指针」。这样一来，a = *p; 和 b = *p; 两句，就只需要从内存中读取一次就够了。因为从内存中读取一次之后，CPU 的寄存器中就已经有了这个值；把这个值直接复用就可以了。这样一来，编译器就会做优化，把两次访存的操作优化成一次。这样做是基于一个假设：我们在代码里没有改变 p 指向内存地址的值，那么这个值就一定不会发生改变。</p>
+<p>此处说的「读取内存」，包括了读取 CPU 缓存和读取计算机主存。<br>然而，由于 MMIP（Memory mapped I/O）的存在，这个假设不一定是真的。例如说，假设 p 指向的内存是一个硬件设备。这样一来，从 p 指向的内存读取数据可能伴随着可观测的副作用：硬件状态的修改。此时，代码的原意可能是将硬件设备返回的连续两个 int 分别保存在 a 和 b 当中。这种情况下，编译器的优化就会导致程序行为不符合预期了。</p>
+<p>总结来说，被 volatile 修饰的变量，在对其进行读写操作时，会引发一些可观测的副作用。而这些可观测的副作用，是由程序之外的因素决定的。</p>
+<p>关键字 volatile 的含义<br>CPP reference 网站是对 C 和 C++ 语言标准的整理。因此，绝大多数时候，我们可以通过这个网站对语言标准进行查询。关于 volatile 关键字，有 C 语言标准和 C++ 语言标准可查。这里摘录两份标准对 volatile 访问的描述。</p>
+<p>C 语言：Every access (both read and write) made through an lvalue expression of volatile-qualified type is considered an observable side effect for the purpose of optimization and is evaluated strictly according to the rules of the abstract machine (that is, all writes are completed at some time before the next sequence point). This means that within a single thread of execution, a volatile access cannot be optimized out or reordered relative to another visible side effect that is separated by a sequence point from the volatile access.<br>C++ 语言：Every access (read or write operation, member function call, etc.) made through a glvalue expression of volatile-qualified type is treated as a visible side-effect for the purposes of optimization (that is, within a single thread of execution, volatile accesses cannot be optimized out or reordered with another visible side effect that is sequenced-before or sequenced-after the volatile access. This makes volatile objects suitable for communication with a signal handler, but not with another thread of execution, see std::memory_order). Any attempt to refer to a volatile object through a non-volatile glvalue (e.g. through a reference or pointer to non-volatile type) results in undefined behavior.<br>这里首先解释两组概念：值类型和序列点（执行序列）。</p>
+<p>值类型指的是左值（lvalue）右值（rvalue）这些概念。关于左值和右值，前作有过介绍。简单的理解，左值可以出现在赋值等号的左边，使用时取的是作为对象的身份；右值不可以出现在赋值等号的左边，使用时取的是对象的值。除了 lvalue 和 rvalue，C++ 还定义了其他的值类型。其中，xvalue 大体可以理解为返回右值引用的函数调用或表达式，而 glvalue 则是 lvalue 和 xvalue 之和。</p>
+<p>序列点则是 C/C++ 中讨论执行顺序时会提到的概念。对于 C/C++ 的表达式来说，执行表达式有两种类型的动作：(1) 计算某个值、(2) 副作用（例如访问 volatile 对象，原子同步，修改文件等）。因此，如果在两个表达式 E1 和 E2 中间有一个序列点，或者在 C++ 中 E1 于序列中在 E2 之前，则 E1 的求值动作和副作用都会在 E2的求值动作和副作用之前。关于序列点和序列顺序规则，可以参考：这里和这里。</p>
+<p>因此我们讲，在 C/C++ 中，对 volatile 对象的访问，有编译器优化上的副作用：</p>
+<p>不允许被优化消失（optimized out）；<br>于序列上在另一个对 volatile 对象的访问之前。<br>这里提及的「不允许被优化」表示对 volatile 变量的访问，编译器不能做任何假设和推理，都必须按部就班地与「内存」进行交互。因此，上述例中「复用寄存器中的值」就是不允许的。</p>
+<p>需要注意的是，无论是 C 还是 C++ 的标准，对于 volatile 访问的序列性，都有单线程执行的前提。其中 C++ 标准特别提及，这个顺序性在多线程环境里不一定成立。</p>
+<p>volatile 与多线程<br>volatile 可以解决多线程中的某些问题，这一错误认识荼毒多年。例如，在知乎「volatile」话题下的介绍就是「多线程开发中保持可见性的关键字」。为了拨乱反正，这里先给出结论（注意这些结论都基于本文第一节提出的约定之上）：</p>
+<p>volatile 不能解决多线程中的问题。<br>按照 Hans Boehm &amp; Nick Maclaren 的总结，volatile 只在三种场合下是合适的。<br>和信号处理（signal handler）相关的场合；<br>和内存映射硬件（memory mapped hardware）相关的场合；<br>和非本地跳转（setjmp 和 longjmp）相关的场合。</p>
+<p>以下我们尝试来用 volatile 关键字解决多线程同步的一个基本问题：happens-before。</p>
+<p>naïve case<br>首先我们考虑这样一段（伪）代码。</p>
+<p>// global shared data<br>bool flag = false;</p>
+<p>thread1() {<br>    flag = false;<br>    Type* value = new Type(/* parameters */);<br>    thread2(value);<br>    while (true) {<br>        if (flag == true) {<br>            apply(value);<br>            break;<br>        }<br>    }<br>    thread2.join();<br>    if (nullptr != value) { delete value; }<br>    return;<br>}</p>
+<p>thread2(Type* value) {<br>    // do some evaluations<br>    value-&gt;update(/* parameters */);<br>    flag = true;<br>    return;<br>}<br>这段代码将 thread1 作为主线程，等待 thread2 准备好 value。因此，thread2 在更新 value 之后将 flag 置为真，而 thread1 死循环地检测 flag。简单来说，这段代码的意图希望实现 thread2 在 thread1 使用 value 之前执行完毕这样的语义。</p>
+<p>对多线程编程稍有了解的人应该知道，这段代码是有问题的。问题主要出在两个方面。其一，在 thread1 中，flag = false 到 while 死循环里，没有任何机会对 flag 的值做修改，因此编译器可能会将 if (flag == true) 的内容全部优化掉。其二，在 thread2 中，尽管逻辑上 update 需要发生在 flag = true 之前，但编译器和 CPU 并不知道；因此 flag = true 可能发生在 update 完成之前，因此 thread1 执行 apply(value) 时可能 value 还未准备好。</p>
+<p>加一个 volatile 试试？<br>在错误的理解中，此时就到了 volatile 登场的时候了。</p>
+<p>首先我们考虑这样一段（伪）代码。</p>
+<p>// global shared data<br>volatile bool flag = false;  // 1.</p>
+<p>thread1() {<br>    flag = false;<br>    Type* value = new Type(/* parameters */);<br>    thread2(value);<br>    while (true) {<br>        if (flag == true) {  // 2.<br>            apply(value);<br>            break;<br>        }<br>    }<br>    thread2.join();<br>    if (nullptr != value) { delete value; }<br>    return;<br>}</p>
+<p>thread2(Type* value) {<br>    // do some evaluations<br>    value-&gt;update(/* parameters */);<br>    flag = true;<br>    return;<br>}<br>这里，在 (1) 处，我们将 flag 声明为 volatile-qualified。因此，在 (2) 处，由于 flag == true 是对 volatile 变量的访问，故而 if-block 不会被优化消失。然而，尽管 flag 是 volatile-qualified，但 value并不是。因此，编译器仍有可能在优化时将 thread2 中的 update 和对 flag 的赋值交换顺序。此外，由于 volatile 禁止了编译器对 flag 的优化，这样使用 volatile 不仅无法达成目的，反而会导致性能下降。</p>
+<p>再加一个 volatile 呢？<br>在错误的理解中，可能会对 value 也加以 volatile 关键字修饰；颇有些「没有什么是一个 volatile 解决不了的；如果不行，那就两个」的意思。</p>
+<p>// global shared data<br>volatile bool flag = false;</p>
+<p>thread1() {<br>    flag = false;<br>    volatile Type* value = new Type(/* parameters */);   // 1.<br>    thread2(value);<br>    while (true) {<br>        if (flag == true) {<br>            apply(value);<br>            break;<br>        }<br>    }<br>    thread2.join();<br>    if (nullptr != value) { delete value; }<br>    return;<br>}</p>
+<p>thread2(volatile Type* value) {<br>    // do some evaluations<br>    value-&gt;update(/* parameters */);                    // 2.<br>    flag = true;<br>    return;<br>}<br>在上一节代码的基础上，(1) 将 value 声明为 volatile-qualified。因此 (2) 处对两个 volatile-qualified 变量进行访问时，编译器不会交换他们的顺序。看起来就万事大吉了。</p>
+<p>然而，volatile 只作用在编译器上，但我们的代码最终是要运行在 CPU 上的。尽管编译器不会将 (2) 处换序，但 CPU 的乱序执行（out-of-order execution）已是几十年的老技术了；在 CPU 执行时，value 和 flag 的赋值仍有可能是被换序了的（store-store）。此外，(2) 处的 value = new Type() 一行代码并不如想象中那么简单。它实际上大概做了三件事情</p>
+<p>分配一块 sizeof(Type) 大小的内存；<br>在这块内存上，执行 Type 类型的初始化；<br>将这块内存的首地址赋值给 value。<br>对于编译器来说，这些工作都是改表达式语句的求值和副作用，因此不会与 flag 赋值语句换序。但是，在 CPU 乱序执行之下，甚至有可能发生 value 和 flag 已赋值完毕，但内存里尚未完成 Type 初始化的情况。此时若 thread1 中使用 value，则程序可能崩溃。</p>
+<p>也许有人会说，x86 和 AMD64 架构的 CPU（大多数个人机器和服务器使用这两种架构的 CPU）只允许 sotre-load 乱序，而不会发生 store-store 乱序；或者在诸如 IA64 架构的处理器上，对 volatile-qualified 变量的访问采用了专门的指令。因而，在这些条件下，这段代码是安全的。尽管如此，使用 volatile 会禁止编译器优化相关变量，从而降低性能，所以也不建议依赖 volatile 在这种情况下做线程同步。另一方面，这严重依赖具体的硬件规范，超出了本文的约定讨论范围。<br>到底应该怎样做？<br>回顾一下，我们最初遇到的问题其实需要解决两件事情。一是 flag 相关的代码块不能被轻易优化消失，二是要保证线程同步的 happens-before 语义。但本质上，设计使用 flag 本身也就是为了构建 happens-before 语义。这也就是说，两个问题，后者才是核心；如有其他不用 flag 的办法解决问题，那么 flag 就不重要。</p>
+<p>对于当前问题，最简单的办法是使用原子操作。</p>
+<p>// global shared data<br>std::atomic<bool> flag = false;  // #include <atomic></p>
+<p>thread1() {<br>    flag = false;<br>    Type* value = new Type(/* parameters */);<br>    thread2(value);<br>    while (true) {<br>        if (flag == true) {<br>            apply(value);<br>            break;<br>        }<br>    }<br>    thread2.join();<br>    if (nullptr != value) { delete value; }<br>    return;<br>}</p>
+<p>thread2(Type* value) {<br>    // do some evaluations<br>    value-&gt;update(/* parameters */);<br>    flag = true;<br>    return;<br>}<br>由于对 std::atomic<bool> 的操作是原子的，同时构建了良好的内存屏障，因此整个代码的行为在标准下是良定义的。</p>
+<p>除此之外，还可以结合使用互斥量和条件变量。</p>
+<p>// global shared data<br>std::mutex m;                   // #include <mutex><br>std::condition_variable cv;     // #include <condition_variable><br>bool flag = false;</p>
+<p>thread1() {<br>    flag = false;<br>    Type* value = new Type(/* parameters */);<br>    thread2(value);<br>    std::unique_lock<a href="std::mutex">std::mutex</a> lk(m);<br>    cv.wait(lk, <a href=""></a>{ return flag; });<br>    apply(value);<br>    lk.unlock();<br>    thread2.join();<br>    if (nullptr != value) { delete value; }<br>    return;<br>}</p>
+<p>thread2(Type* value) {<br>    std::lock_guard<a href="std::mutex">std::mutex</a> lk(m);<br>    // do some evaluations<br>    value-&gt;update(/* parameters */);<br>    flag = true;<br>    cv.notify_one();<br>    return;<br>}<br>这样一来，由线程之间的同步由互斥量和条件变量来保证，同时也避免了 while (true) 死循环空耗 CPU 的情况。</p>
+<p>原文地址：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/33074506">https://zhuanlan.zhihu.com/p/33074506</a> </p>
+<p><a target="_blank" rel="noopener" href="https://www.jb51.net/article/179240.htm">https://www.jb51.net/article/179240.htm</a><br><a target="_blank" rel="noopener" href="https://www.huaweicloud.com/articles/e4e3ee53e594c40a9ad3da9687f94bc7.html">https://www.huaweicloud.com/articles/e4e3ee53e594c40a9ad3da9687f94bc7.html</a><br><a target="_blank" rel="noopener" href="https://www.yht7.com/news/29698">https://www.yht7.com/news/29698</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq100440110/article/details/51858626">https://blog.csdn.net/qq100440110/article/details/51858626</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/380b041b5aa6">https://www.jianshu.com/p/380b041b5aa6</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/gjq_1988/article/details/39520729">https://blog.csdn.net/gjq_1988/article/details/39520729</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000025183443">https://segmentfault.com/a/1190000025183443</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/dd864140130/article/details/56494925">https://blog.csdn.net/dd864140130/article/details/56494925</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2021/03/15/language_c_cpp_keyword_volatile_c/" title="volatile 关键字详解" target="_blank" rel="external">http://example.com/2021/03/15/language_c_cpp_keyword_volatile_c/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/cofess" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/cofess" target="_blank"><span class="text-dark">昵称</span><small class="ml-1x">Web Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/15/language_c_cpp_keyword_convert/" title="c++强制类型转换"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/15/language_c_cpp_keyword_static_c/" title="static详解(转)"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '',
+    appKey: '',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

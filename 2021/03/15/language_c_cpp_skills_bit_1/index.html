@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>位操作及应用 | 麒麟科技</title>
+  <meta name="description" content="1. “按位与”运算符（&amp;）      参加运算的两个数据，按二进位进行“与”运算。原则是全1为1,有0为0,即：0&amp;0&#x3D;0; 0&amp;1&#x3D;0; 1&amp;0&#x3D;0; 1&amp;1&#x3D;1; 如下例：      a&#x3D;5&amp;3; &#x2F;&#x2F;a&#x3D;(0b 0101) &amp; (0b 0011) &#x3D;0b 0001 &#x3D;1       那么如果参加运算的两个数为负数，又该如何算呢？会以其补码形">
+<meta property="og:type" content="article">
+<meta property="og:title" content="位操作及应用">
+<meta property="og:url" content="http://example.com/2021/03/15/language_c_cpp_skills_bit_1/index.html">
+<meta property="og:site_name" content="����Ƽ�">
+<meta property="og:description" content="1. “按位与”运算符（&amp;）      参加运算的两个数据，按二进位进行“与”运算。原则是全1为1,有0为0,即：0&amp;0&#x3D;0; 0&amp;1&#x3D;0; 1&amp;0&#x3D;0; 1&amp;1&#x3D;1; 如下例：      a&#x3D;5&amp;3; &#x2F;&#x2F;a&#x3D;(0b 0101) &amp; (0b 0011) &#x3D;0b 0001 &#x3D;1       那么如果参加运算的两个数为负数，又该如何算呢？会以其补码形">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-15T01:42:19.228Z">
+<meta property="article:modified_time" content="2021-03-17T01:24:16.591Z">
+<meta property="article:author" content="Mr.wang">
+<meta property="article:tag" content="c++&amp;c语言">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2021/03/15/language_c_cpp_skills_bit_1/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="����Ƽ�" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-green" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/cofess" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">昵称</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/idea/">idea</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/management/">management</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/">search</a><span class="category-list-count">7</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/search/clucene/">clucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/elasticsearch/">elasticsearch</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/indextank/">indextank</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/kingso/">kingso</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/lucene/">lucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/sphinx/">sphinx</a><span class="category-list-count">2</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E5%8E%9F%E5%88%9B/">原创</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><span class="category-list-count">7</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/">生活</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/%E4%B8%8A%E5%AD%A6%E7%9A%84%E6%84%8F%E4%B9%89/">上学的意义</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><span class="category-list-count">20</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a><span class="category-list-count">20</span></li></ul></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a><span class="tag-list-count">21</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/clucene/" rel="tag">clucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/" rel="tag">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/indextank/" rel="tag">indextank</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kingso/" rel="tag">kingso</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lucene/" rel="tag">lucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/management/" rel="tag">management</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sphinx/" rel="tag">sphinx</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/c-c%E8%AF%AD%E8%A8%80/" style="font-size: 14px;">c++&c语言</a> <a href="/tags/clucene/" style="font-size: 13px;">clucene</a> <a href="/tags/elasticsearch/" style="font-size: 13px;">elasticsearch</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/indextank/" style="font-size: 13px;">indextank</a> <a href="/tags/kingso/" style="font-size: 13px;">kingso</a> <a href="/tags/lucene/" style="font-size: 13px;">lucene</a> <a href="/tags/management/" style="font-size: 13px;">management</a> <a href="/tags/sphinx/" style="font-size: 13.5px;">sphinx</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">45</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/24/language_c_cpp_keyword_sizeof_3/" class="title">设置字节对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-23T23:15:54.507Z" itemprop="datePublished">2021-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/" class="title">内存对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T13:52:29.627Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_f_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:17:54.001Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_skills_bit_2/" class="title">按位指定结构体中变量的大小</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:16:54.603Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_function_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T00:55:39.668Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-language_c_cpp_skills_bit_1" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      位操作及应用
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/15/language_c_cpp_skills_bit_1/" class="article-date">
+	  <time datetime="2021-03-15T01:42:19.228Z" itemprop="datePublished">2021-03-15</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a>►<a class="article-category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/15/language_c_cpp_skills_bit_1/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p> 1. “按位与”运算符（&amp;）<br>      参加运算的两个数据，按二进位进行“与”运算。原则是全1为1,有0为0,即：0&amp;0=0; 0&amp;1=0; 1&amp;0=0; 1&amp;1=1; 如下例：<br>      a=5&3; //a=(0b 0101) &amp; (0b 0011) =0b 0001 =1<br> <br>      那么如果参加运算的两个数为负数，又该如何算呢？会以其补码形式表示的二进制数来进行与运算。<br>      a=-5&amp;-3; //a=(0b 1011) &amp; (0b1101) =0b 1001 =-7 <br> <br>     在实际的应用中与操作经常被用于实现特定的功能：<br>           1）清零<br>      “按位与”通常被用来使变量中的某一位清零。如下例：<br>       a=0xfe; //a=0b 11111110<br>       a=a&0x55; //使变量a的第1位、第3位、第5位、第7位清零 a= 0b 01010100<br>           2）检测位<br>                要知道一个变量中某一位是‘1’还是‘0’，可以使用与操作来实现。<br>                a=0xf5; //a=0b 11110101<br>                 result=a&0x08; //检测a的第三位,result=0<br>           3）保留变量的某一位<br>                要屏蔽某一个变量的其它位，而保留某些位，也可以使用与操作来实现。<br>                 a=0x55; //a=0b 01010101<br>                 a=a&0x0f; //将高四位清零，而保留低四位 a=0x05<br>例子1:<br>i &amp; <del>0x7F<br>该方法中，0x7F的值为127，按位取反后</del>0x7F的值为-128。<br>当0&lt;=i&lt;=127时，(i &amp; ~0x7F) =0；当128&lt;=i&lt;=255时，(i &amp; ~0x7F) =128；当256&lt;=i&lt;=511时，(i &amp; ~0x7F) =256；以此类推。<br>也就是说，判断的条件不等于0成立 ，i的取值范围是i&gt;=128。<br>调用了RAMOutputStream类的writeBytes()方法，写入的字节值为(i &amp; 0x7f) | 0x80，因为，(i &amp; ~0x7F)的值为0，128，256，384，512……，再与0x80(即128)做按位或运算，也就是当(i &amp; 0x7f) 的值为0时，写入的字节是128，从而(i &amp; 0x7f) | 0x80为写入的值：128，256，384，512……，没有0了。</p>
+<p> <br>2. “按位或”运算符（｜）<br>参与或操作的两个位，只要有一个为‘1’，则结果为‘1’。即有‘1’为‘1’，全‘0’为‘0’。0|0=0; 0|1=1; 1|0=1; 1|1=1;例如：<br>a=0x30|0x0f; //a=(0b00110000)|(0b00001111)=(0b00111111)=0x3f<br> <br>     “按位或”运算最普遍的应用就是对一个变量的某些位置‘1’。如下例：<br>      a=0x00; //a=0b 00000000<br>      a=a|0x7f; //将a的低7位置为1,a=0x7f<br> <br>      3. “异或”运算符（＾）<br>          异或运算符＾又被称为XOR运算符。当参与运算的两个位相同（‘1’与‘1’或‘0’与‘0’）时结果为‘0’。不同时为‘1’。即相同为0，不同为1</p>
+<p>。 0^0=0; 0^1=1; 1^0=1;1^1=0;例如：<br>a=0x55^0x3f; //a=(0b01010101)^(0b00111111)=(0b01101010)=0x6a<br> <br>          异或运算主要有以下几种应用：<br>1）翻转某一位：当一个位与‘1’作异或运算时结果就为此位翻转后的值。如下例：<br>                 a=0x35; //a=0b00110101<br>                 a=a^0x0f; //a=0b00111010 a的低四位翻转<br>  关于异或的这一作用，有一个典型的应用，即取浮点的相反数，具体的实现如下：<br>                 f=1.23; //f为浮点型变量　值为1.23<br>                 f=f*-1; //f乘以-1，实现取其相反数，要进行一次乘运算<br>                 f=1.23;<br>                 ((unsigned char *)&amp;f)[0]^=0x80; //将浮点数f的符号位进行翻转实现取相反数<br>2）保留原值：当一个位与‘0’作异或运算时，结果就为此位的值。如下例：<br>                 a=0xff; //a=0b11111111<br>                 a=a^0x0f; //a=0b11110000 与0x0f作异或，高四位不变，低四位翻转<br>3）交换两个变量的值，而不用临时变量，要交换两个变量的值，传统的方法都需要一个临时变量。实现如下：<br>                void swap(unsigned char *pa,unsigned char *pb)<br>               {<br>                    unsigned char temp=*pa;//定义临时变量，将pa指向的变量值赋给它<br>                   *pa=*pb;<br>                   *pb=temp;　//变量值对调<br>               }<br>               而使用异或的方法来实现，就可以不用临时变量，如下：<br>               void swap_xor(unsigned char *pa,unsigned char *pb)<br>              {<br>                   *pa=<em>pa^</em>pb;<br>                   *pb=<em>pa^</em>pb;<br>                   *pa=<em>pa^</em>pb; //采用异或实现变量对调<br>              }<br>几个经典的位运算函数<br>4.1求当前机器无符号整型最大长度<br>/<em>the max length of unsigned int</em>/<br>int  int_size ()<br>{<br>    unsigned int  bits;<br>    int size = 0;</p>
+<p>    bits = ~0;</p>
+<p>    while ( bits ) {<br>       ++size;<br>       bits &gt;&gt;= 1;<br>    }<br>    return size;<br>}</p>
+<p>4.2移位运算<br>/<em>a bit mover for unsigned int<br>  if n &gt; 0 move left for n bits,else move right</em>/<br>unsigned int bit_shift (unsigned int value,int n)<br>{<br>    int intsize=int_size();     /<em>the length of unsigned int</em>/</p>
+<p>    if(n&gt;0 &amp;&amp; n&lt; intsize)       /*move left*/<br>      value&lt;&lt;=n;<br>    else if (n&lt;0 &amp;&amp; n&gt; -intsize)  /<em>move right</em>/<br>      value&gt;&gt;=-n;<br>    else<br>      value=0;<br>    return value;<br>}</p>
+<p>4.3循环移位运算<br>/<em>a bit rotate mover for unsigned int<br>  if n &gt; 0 move left for n bits,else move right</em>/<br>unsigned int bit_rotate (unsigned int value, int n)<br>{<br>    unsigned int result,bits,intsize;</p>
+<p>    intsize=int_size();  /<em>the length of unsigned int</em>/</p>
+<p>    if(n &gt; 0)<br>      n=n % intsize;<br>    else<br>      n=-(-n % intsize);</p>
+<p>    if(n==0)<br>      result=value;<br>    else if(n &gt;0 ){               /<em>move left</em>/<br>        bits=value &gt;&gt; (intsize-n);/<em>bits should be in the rightest</em>/<br>        result=value &lt;&lt; n|bits;<br>    }else{                      /*move right*/<br>        n=-n;<br>        bits=value &lt;&lt; (intsize-n);/*bits should be in the leftest*/<br>        result=value &gt;&gt; n|bits;<br>    }<br>    return result;<br>}</p>
+<p>4.4返回无符号整型数value中从右起第p位的值<br>/* get bit No.p(from right) of value to see if it is on */<br>int  bit_get (unsigned int  value, int  p)<br>{<br>    int intsize=int_size();       /<em>the length of unsigned int</em>/</p>
+<p>    if ( p &lt; 0  || p &gt; intsize-1 )/<em>out of range</em>/<br>       return  0;</p>
+<p>    if ( (value &gt;&gt; p) &amp; 1 )<br>       return 1;<br>    else<br>       return 0;<br>}</p>
+<p>4.5将无符号整型数value中从右起的第p位置1<br>/* set bit No.p(from right) of value on */<br>unsigned int  bit_set (unsigned int value, int  p)<br>{<br>    int intsize=int_size();       /<em>the length of unsigned int</em>/</p>
+<p>    if ( p &lt; 0  || p &gt; intsize-1 )/<em>out of range</em>/<br>       return  0;</p>
+<p>    return  value | (1 &lt;&lt; p);<br>}</p>
+<p>4.6返回无符号整型数value中从第p位(右起)向右n位的值<br>[1]<del>(</del>0 &lt;&lt; n)表示最右边n位全为1;<br>[2]value &gt;&gt; (p+1-n)表示将目标位字段移至最右端;<br>/*get n bits of value at position p(from right) */<br>unsigned bits_get (unsigned int value, int p, int n)<br>{<br>     int intsize=int_size();  /<em>the length of unsigned int</em>/</p>
+<p>     if ( n &lt; 0  || p &lt; 0  ||  p + n &gt; intsize )<br>       return  0;<br>    return(value &gt;&gt; (p+1-n)) &amp; <del>(</del>0 &lt;&lt; n);<br>}</p>
+<p>4.7将无符号整型数value中从第p位(右起)向右n位设置为y最右边n位的值<br>[1]<del>(</del>0 &lt;&lt; n)表示最右边n位全为1;<br>[2](<del>(</del>0 &lt;&lt; n) &lt;&lt; (p+1-n)表示将这n个1位左移至位置p;<br>[3]<del>(</del>(~0 &lt;&lt; n) &lt;&lt; (p+1-n))表示将从位置p开始的n位设置零,其余位设置一;<br>[4]unsigned tar=bits_get(y,n-1,n);取出y的低n位;<br>/<em>set n bits of value at position p(from right) with bits of y</em>/<br>unsigned bits_set (unsigned value, int p, int n, unsigned int y)<br>{<br>    int intsize=int_size();  /<em>the length of unsigned int</em>/</p>
+<p>    if ( n &lt; 0  ||  p &lt; 0  ||  p + n &gt; intsize )<br>       return  0;<br>    unsigned tar=bits_get(y,n-1,n);<br>    return (value &amp; <del>(</del>(~0 &lt;&lt; n) &lt;&lt; (p+1-n))) | tar;<br>}</p>
+<p><strong>源文档</strong><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/xuqiang/archive/2010/02/12/1953759.html">http://www.cnblogs.com/xuqiang/archive/2010/02/12/1953759.html</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2021/03/15/language_c_cpp_skills_bit_1/" title="位操作及应用" target="_blank" rel="external">http://example.com/2021/03/15/language_c_cpp_skills_bit_1/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/cofess" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/cofess" target="_blank"><span class="text-dark">昵称</span><small class="ml-1x">Web Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/15/language_c_cpp_common_operator/" title="C语言运算符优先级"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/15/language_c_cpp_common_goodsite/" title="c、c++一些好的网站"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '',
+    appKey: '',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

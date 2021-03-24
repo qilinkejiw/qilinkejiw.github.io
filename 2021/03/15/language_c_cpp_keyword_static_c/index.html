@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>static详解(转) | 麒麟科技</title>
+  <meta name="description" content="static详解static 作为关键字出现在C++语言当中,其运用比较复杂,其修饰全局变量,局部变量,类成员变量,类成员函数等都有不同释义,下面为大家详细描述一下.一 static概述static 从笼统意义的理解上,可以理解为 被此关键字修饰过的函数或变量,即为静态函数或静态变量.静态变量或函数式在系统编译期,main函数运行前就已经分配内存的.在声明它的程序块,子程序块或函数内部有效,值保持">
+<meta property="og:type" content="article">
+<meta property="og:title" content="static详解(转)">
+<meta property="og:url" content="http://example.com/2021/03/15/language_c_cpp_keyword_static_c/index.html">
+<meta property="og:site_name" content="����Ƽ�">
+<meta property="og:description" content="static详解static 作为关键字出现在C++语言当中,其运用比较复杂,其修饰全局变量,局部变量,类成员变量,类成员函数等都有不同释义,下面为大家详细描述一下.一 static概述static 从笼统意义的理解上,可以理解为 被此关键字修饰过的函数或变量,即为静态函数或静态变量.静态变量或函数式在系统编译期,main函数运行前就已经分配内存的.在声明它的程序块,子程序块或函数内部有效,值保持">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-15T14:15:07.449Z">
+<meta property="article:modified_time" content="2021-03-24T13:18:04.125Z">
+<meta property="article:author" content="Mr.wang">
+<meta property="article:tag" content="c++&amp;c语言">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2021/03/15/language_c_cpp_keyword_static_c/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="����Ƽ�" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-green" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/cofess" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">昵称</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/idea/">idea</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/management/">management</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/">search</a><span class="category-list-count">7</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/search/clucene/">clucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/elasticsearch/">elasticsearch</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/indextank/">indextank</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/kingso/">kingso</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/lucene/">lucene</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/search/sphinx/">sphinx</a><span class="category-list-count">2</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E5%8E%9F%E5%88%9B/">原创</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><span class="category-list-count">7</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/">生活</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/%E4%B8%8A%E5%AD%A6%E7%9A%84%E6%84%8F%E4%B9%89/">上学的意义</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><span class="category-list-count">20</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a><span class="category-list-count">20</span></li></ul></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a><span class="tag-list-count">21</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/clucene/" rel="tag">clucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/" rel="tag">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/indextank/" rel="tag">indextank</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kingso/" rel="tag">kingso</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lucene/" rel="tag">lucene</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/management/" rel="tag">management</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sphinx/" rel="tag">sphinx</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/c-c%E8%AF%AD%E8%A8%80/" style="font-size: 14px;">c++&c语言</a> <a href="/tags/clucene/" style="font-size: 13px;">clucene</a> <a href="/tags/elasticsearch/" style="font-size: 13px;">elasticsearch</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/indextank/" style="font-size: 13px;">indextank</a> <a href="/tags/kingso/" style="font-size: 13px;">kingso</a> <a href="/tags/lucene/" style="font-size: 13px;">lucene</a> <a href="/tags/management/" style="font-size: 13px;">management</a> <a href="/tags/sphinx/" style="font-size: 13.5px;">sphinx</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">45</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/24/language_c_cpp_keyword_sizeof_3/" class="title">设置字节对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-23T23:15:54.507Z" itemprop="datePublished">2021-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_keyword_sizeof_2/" class="title">内存对齐</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T13:52:29.627Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_f_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:17:54.001Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/">来源</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%9D%A5%E6%BA%90/%E8%BD%AC%E8%BD%BD/">转载</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_skills_bit_2/" class="title">按位指定结构体中变量的大小</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T01:16:54.603Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/language_c_cpp_function_1_c/" class="title">函数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T00:55:39.668Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-language_c_cpp_keyword_static_c" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      static详解(转)
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/15/language_c_cpp_keyword_static_c/" class="article-date">
+	  <time datetime="2021-03-15T14:15:07.449Z" itemprop="datePublished">2021-03-15</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a>►<a class="article-category-link" href="/categories/%E8%AF%AD%E8%A8%80/c-c%E8%AF%AD%E8%A8%80/">c++&c语言</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/c-c%E8%AF%AD%E8%A8%80/" rel="tag">c++&c语言</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/15/language_c_cpp_keyword_static_c/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>static详解<br>static 作为关键字出现在C++语言当中,其运用比较复杂,其修饰全局变量,局部变量,类成员变量,类成员函数等都有不同释义,下面为大家详细描述一下.<br>一 static概述<br>static 从笼统意义的理解上,可以理解为 被此关键字修饰过的函数或变量,即为静态函数或静态变量.<br>静态变量或函数式在系统编译期,main函数运行前就已经分配内存的.在声明它的程序块,子程序块或函数内部有效,值保持<br>虽然上面讲了static关键字修饰不同的类型单位会有不同的效果,但其实可以理解为面向过程程序中的static和面向对象程序中的static,<br>面向过程中的static主要适用于普通变量和函数.<br>面向对象中的static主要适用于类中的成员变量和成员函数.<br>二 static用法详解<br>面向过程中的static<br>静态全局变量<br>在全局变量之前,加上关键字static,就可以定义该变量为静态全局变量.<br>例:<br>#include&lt;stdio.h&gt;<br>static int Temp = 10;<br>void Test();<br>int main()<br>{<br>    printf(“Temp is %d\n”, Temp);//输出:10<br>    Test();//输出:10<br>    printf(“Temp is %d\n”, Temp);//输出:11<br>    return 0;<br>}<br>void Test()<br>{<br>    Temp++;<br>}<br>局部变量之前加上static,可以指定该局部变量为静态局部变量</p>
+<p>代码中主要有一下几个特点<br>01.在全局数据中的变量如果没有显示的初始化会自动被程序初始化为0(这个特性非静态全局变量也有),而在函数体内声明的变量如果不显示初始化则会使一个随机值.<br>02.静态全局变量在声明它的整个文件中都是课件的,而在文件之外是不可见的,这点区别于全局变量.<br>03.静态全局变量在全局数据区分配内存<br>04.其他文件中可以定义同名int型变量Temp,不会冲突,各取各的值.<br>有一定C++语言功底的朋友可能看出,上面的示例代码 其实如果将Temp的static去掉,程序也可以正常执行.但是请注意以下区别.<br>01.全局变量时不显示调用static关键字修饰的变量,全局变量默认是有外部连接性的,其作用域是整个工程,在一个文件内定义的全局变量可以通过,包含其所在头文件或显示调用 extern关键字修饰全局变量的变量名声明来引用.<br>02.静态全局变量是显示调用static修饰的全局变量,其作用域只在声明此变量的文件中,其他文件即使使用extern关键字修饰其声明也不可使用.<br>03.关于第二点,其描述是C++标准,但是有些编译器会不执行次标准特意对其进行优化,目前亲测的vs2012与g++都不支持这个标准…个人表示也是醉了</p>
+<p>静态局部变量<br>在局部变量之前加上static,可以指定该局部变量为静态局部变量<br>#include &lt;stdio.h&gt;<br>void Test();<br>int main()<br>{<br>    for(int i=0; i&lt;5; i++)<br>    {<br>        Test();<br>    }<br>    return 0;<br>}<br>void Test()<br>{<br>    static Temp = 10;<br>    printf(“Temp is %d\n”, Temp);<br>    Temp++;<br>}<br>以上程序输出为:</p>
+<p>10<br>11<br>12<br>13<br>14<br>通常,在一个函数作用域内定义一个变量,每次运行到该函数时,系统会给局部变量分配内存,当函数结束时,该变量的内存会被系统回收至栈内存当中,局部变量也会消散.<br>但是如果改局部变量被声明为static 静态局部变量时,则该变量的生命周期不受到该函数的作用域限制,也就是说即使函数运行结束,系统仍然会保留该静态变量的内存,不会回收,它始终驻留在全局数据区当中,直到整个进程程序运行结束时,其内存才会被回收.<br>静态局部变量有以下特点:<br>01.其内存存放在 程序的全局数据区中,<br>02.静态局部变量在程序执行到该对象声明时,会被首次初始化.其后运行到该对象的声明时,不会再次初始化,这也是为什么上面程序测试函数每次输出的值都是递增的原因.<br>03.如果静态局部变量没有被显示初始化,则其值会自动被系统初始化为0.<br>04.局部静态变量 不能被其作用域之外的其他模块调用,其调用范围仅限于声明该变量的函数作用域当中.</p>
+<p>静态函数<br>在函数的返回类型前加上关键字static,可以将此函数声明为静态函数.静态函数与普通函数不同,其作用域只在声明它的文件当中.其他文件可以定义同名的全局函数,而不冲突.<br>想要在其他文件调用静态函数 需要显示的调用extern关键字修饰其声明.否则编译器会link error.<br>#include&lt;stdio.h&gt;<br>static void Test();<br>int main()<br>{<br>    Test();<br>    return 0;<br>}<br>void Test()<br>{<br>    printf(“Is Static Fun\n”);<br>}<br>总结定义静态函数的好处:</p>
+<p>01.其他文件可以定义同名函数<br>02.静态函数不会被其他文件所引用,其作用域只在当前声明他的文件中.</p>
+<p>面向对象中的static<br>静态数据成员<br>在类内的数据成员声明前加上关键字static,则该成员将会被声明为静态数据成员.<br>#include &lt;stdio.h&gt;<br>class TempClass<br>{<br>public:<br>    TempClass(int a, int b, int c);<br>    void Show();<br>private:<br>    int a,b,c;<br>    static int T;<br>}<br>int TempClass::T = 0;//初始化静态数据成员<br>TempClass::TempClass(int a, int b, int c)<br>{<br>    this-&gt;a = a;<br>    this-&gt;b = b;<br>    this-&gt;c = c;<br>    T = a + b + c;<br>}<br>void TempClass::Show()<br>{<br>    printf(“T is %d\n”, T);<br>}<br>int main()<br>{<br>    TempClass ClassA(1,1,1);<br>    ClassA.Show();//输出1+1+1 = 3;<br>    TempClass ClassB(3,3,3);<br>    ClassB.Show();//输出3+3+3 = 9;<br>    ClassA.Show();//输出9<br>    return 0;<br>}<br>从上面的测试代码可以看出 静态数据成员的特点:</p>
+<p>01.静态数据成员的服务对象并非是单个类实例化的对象,而是所有类实例化的对象(这点可以用于设计模式中的单例模式实现).<br>02.静态数据成员必须显示的初始化分配内存,在其包含类没有任何实例花之前,其已经有内存分配.<br>03.静态数据成员与其他成员一样,遵从public,protected,private的访问规则.<br>04.静态数据成员内存存储在全局数据区,只随着进程的消亡而消亡.</p>
+<p>静态数据成员与全局变量相比的优势:<br>01.静态数据成员不进入程序全局名字空间,不会与其他全局名称的同名同类型变量冲突.<br>02.静态数据成员可以实现C++的封装特性,由于其遵守类的访问权限规则.所以相比全局变量更加灵活.</p>
+<p>静态成员函数<br>在类的成员函数返回类型之前添加static,即可声明此成员函数为静态成员函数.<br>#include &lt;stdio.h&gt;</p>
+<p>class TempClass<br>{<br>public:<br>    TempClass(int a, int b, int c);<br>    static void Show();<br>private:<br>    int a,b,c;<br>    static int T;<br>}<br>int TempClass::T = 0;    //初始化静态数据成员<br>TempClass::TempClass(int a, int b, int c)<br>{<br>    this-&gt;a = a;<br>    this-&gt;b = b;<br>    this-&gt;c = c;<br>    T = a + b + c;<br>}<br>void TempClass::Show()<br>{<br>    printf(“T is %d\n”, T);<br>}<br>int main()<br>{<br>    TempClass ClassA(1,1,1);<br>    ClassA.Show();<br>    TempClass ClassB(3,3,3);<br>    ClassB.Show();</p>
+<pre><code>TempClass::Show();    //注意此处的调用方式.
+return 0;
+</code></pre>
+<p>}<br>从上面的示例代码中可以看出 静态局部函数的特点如下:</p>
+<p>01.静态成员函数比普通成员函数多了一种调用方式.<br>02.静态成员函数为整个类服务,而不是具体的一个类的实例服务.(这句话可能比较绕口,可以理解为在没有任何实例化的类对象的条件下调用类方法,详见上面代码注释处.)<br>03.静态成员函数中没有隐含的this指针,所以静态成员函数不可以操作类中的非静态成员.</p>
+<p>ps:关于this指针的深入解释<br>在C++中,普通的成员函数一般都隐含了一个this指针,例如调用函数Fun(),实际上是this-&gt;Fun().<br>静态成员函数中没有这样的this指针,所以静态成员函数不能操作类中的非静态成员函数.否则编译器会报错.</p>
+<p>三 注意事项<br>01.静态数据成员都是静态存储的,所以必须在main函数之前显示的对其进行初始化.<br>02.静态成员初始化与一般成员的初始化不同.<br>03.不能再头文件中声明静态全局变量,这点在简单的测试代码中无法体现,只有在多文件同时包含,引用和操作时候才会显露出来.其结果可能是产生了多个同名的静态数据.一旦出现这种问题,是非常难以查找和排除的.<br>04.不能将静态成员函数定义为虚函数.<br>05.静态成员函数没有this指针.<br>06.static缩短了子类对父类静态成员访问的时间,相对来说节省了内存空间<br>07.关于06条的补充,如果不想在子类中操作父类的静态成员,则可以在子类中定义一个同名的static成员.这样既可覆盖父类中的静态成员.并且根据C++的多态性变量命名规则.这样做是安全的.<br>08.静态成员声明在类中,操作在其外部,所以对其取地址操作就跟取普通成员的操作略有不同.静态变量地址是指向其数据类型的指针,函数地址则是一个类型为nonmember的函数指针.<br>————————————————<br>版权声明：本文为CSDN博主「鬼筠」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010797208/article/details/41549461">https://blog.csdn.net/u010797208/article/details/41549461</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2021/03/15/language_c_cpp_keyword_static_c/" title="static详解(转)" target="_blank" rel="external">http://example.com/2021/03/15/language_c_cpp_keyword_static_c/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/cofess" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/cofess" target="_blank"><span class="text-dark">昵称</span><small class="ml-1x">Web Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/15/language_c_cpp_keyword_volatile_c/" title="volatile 关键字详解"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/15/language_c_cpp_keyword_sizeof_1/" title="sizeof详解"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '',
+    appKey: '',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
